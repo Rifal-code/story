@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+@theme {
+  --color-saweriaYellow: #fde047;
+}
+
+
+@layer base {
+  body {
+    @apply font-sans bg-gray-50 text-gray-800;
+  }
+}
+
+/* Biar gak terlalu polos dan kayak student banget yang belajar nambahin css manual */
+.brand-name {
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-decoration: none;
+  color: #333;
+}
+
+.nav-list li a {
+  padding: 6px 10px;
+  display: block;
+  color: #333;
+  text-decoration: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.nav-list li a:hover {
+  color: #fde047; /* Saweria Yellow */
+  background: #333;
+  border-radius: 8px;
+}
