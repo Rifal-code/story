@@ -5,7 +5,7 @@ class LoginPage {
   async render() {
     return `
       <div class="max-w-md mx-auto mt-10 bg-[#caffbf] p-8 border-2 border-black rounded-2xl shadow-[8px_8px_0_0_#000]">
-        <h2 class="text-3xl font-bold text-center mb-6 font-mono text-black">Masuk <span class="bg-white px-2 border-2 border-black shadow-[2px_2px_0_0_#000] inline-block -rotate-2">Dulu</span></h2>
+        <h1 class="text-3xl font-bold text-center mb-6 font-mono text-black">Masuk <span class="bg-white px-2 border-2 border-black shadow-[2px_2px_0_0_#000] inline-block -rotate-2">Dulu</span></h1>
         <form id="login-form" class="space-y-5">
           <div>
             <label for="email" class="block text-sm font-bold text-black mb-1">Email</label>

@@ -47,7 +47,7 @@ class DetailPage {
       });
 
       container.innerHTML = `
-        <h2 class="text-4xl font-bold mb-2 font-mono text-black">${story.name}</h2>
+        <h1 class="text-4xl font-bold mb-2 font-mono text-black">${story.name}</h1>
         <p class="text-sm font-bold text-gray-800 mb-6 bg-white inline-block px-2 py-1 border-2 border-black rounded">${date}</p>
         
         <img src="${story.photoUrl}" alt="Foto dari ${story.name}" class="w-full h-auto max-h-[500px] object-cover rounded-2xl mb-6 border-2 border-black shadow-[4px_4px_0_0_#000]">

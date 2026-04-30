@@ -4,7 +4,7 @@ self.addEventListener('push', (event) => {
   const title = data.title || 'Notification';
   const options = {
     body: data.options?.body || 'Anda mendapat pemberitahuan baru.',
-    icon: '/favicon.png', // Fallback icon
+    icon: '/favicon.png', 
     badge: '/favicon.png',
   };
 
@@ -13,7 +13,7 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  // Optional: Arahkan user saat notifikasi diklik
+
   event.waitUntil(
     clients.matchAll({ type: 'window' }).then((clientList) => {
       if (clientList.length > 0) {

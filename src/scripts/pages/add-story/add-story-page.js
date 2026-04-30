@@ -6,7 +6,7 @@ class AddStoryPage {
   async render() {
     return `
       <div class="max-w-2xl mx-auto mt-6 bg-[#ffadad] p-6 md:p-8 border-2 border-black rounded-2xl shadow-[8px_8px_0_0_#000]">
-        <h2 class="text-3xl font-bold mb-6 font-mono text-black">Tambah <span class="bg-white px-2 border-2 border-black shadow-[2px_2px_0_0_#000] inline-block -rotate-2">Story</span></h2>
+        <h1 class="text-3xl font-bold mb-6 font-mono text-black">Tambah <span class="bg-white px-2 border-2 border-black shadow-[2px_2px_0_0_#000] inline-block -rotate-2">Story</span></h1>
         
         <form id="add-story-form" class="space-y-6">
           <div>
@@ -142,7 +142,7 @@ class AddStoryPage {
         attribution: '&copy; OpenStreetMap contributors'
       }).addTo(map);
 
-      // Pastikan map me-render ulang saat container terlihat
+  
       setTimeout(() => {
         map.invalidateSize();
       }, 500);

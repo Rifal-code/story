@@ -5,6 +5,7 @@ class HomePage {
   async render() {
     return `
       <div class="space-y-12 mt-6">
+        <h1 class="text-4xl font-bold font-mono text-black">Beranda</h1>
         <section class="bg-[#ffadad] p-6 rounded-2xl border-2 border-black shadow-[6px_6px_0_0_#000]">
           <h2 class="text-2xl font-bold mb-4 font-mono text-black">Lokasi Stories</h2>
           <div id="map" class="h-64 md:h-96 w-full rounded-xl border-2 border-black z-0 relative"></div>
@@ -99,7 +100,6 @@ class HomePage {
           </div>
         `);
         
-        // Simpan marker ke DOM card untuk sinkronisasi list dan peta (Kriteria Skilled)
         const card = document.getElementById(`story-card-${index}`);
         if (card) {
           card.addEventListener('mouseenter', () => {
