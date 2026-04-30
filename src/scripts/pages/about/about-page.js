@@ -8,6 +8,5 @@ export default class AboutPage {
   }
 
   async afterRender() {
-    // Do your job here
   }
 }

@@ -3,7 +3,6 @@ import Auth from './auth';
 
 const VAPID_PUBLIC_KEY = 'BCCs2eonMI-6H2ctvFaWg-UYdDv387Vno_bzUzALpB442r2lCnsHmtrx8biyPi_E-1fSGABK_Qs_GlvPoJJqxbk';
 
-// Helper function to convert VAPID Key for pushManager
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding)
@@ -29,7 +28,6 @@ const NotificationHelper = {
     try {
       const registration = await navigator.serviceWorker.register('/sw.js');
       
-      // Jika user sudah login, cek status notifikasi
       if (Auth.isLoggedIn()) {
         await this.requestPermissionAndSubscribe(registration);
       }
@@ -45,10 +43,8 @@ const NotificationHelper = {
       return;
     }
 
-    // Cek apakah sudah subscribe
     let subscription = await registration.pushManager.getSubscription();
     
-    // Jika belum subscribe, buat subscription baru
     if (!subscription) {
       try {
         subscription = await registration.pushManager.subscribe({
@@ -61,7 +57,6 @@ const NotificationHelper = {
       }
     }
 
-    // Ubah format subscription object agar sesuai dengan schema API Dicoding
     const subJson = subscription.toJSON();
     const payload = {
       endpoint: subJson.endpoint,
@@ -71,8 +66,13 @@ const NotificationHelper = {
       }
     };
 
+    if (localStorage.getItem('hasSubscribed') === 'true') {
+      return;
+    }
+
     try {
       await API.subscribeNotification(payload);
+      localStorage.setItem('hasSubscribed', 'true');
       console.log('Berhasil subscribe web push notification ke server API.');
     } catch (error) {
       console.error('Gagal mengirim subscription ke API:', error);

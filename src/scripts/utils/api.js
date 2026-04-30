@@ -32,7 +32,7 @@ const API = {
     const response = await fetch(`${BASE_URL}/stories`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
-      body: data, // FormData doesn't need Content-Type header manually
+      body: data,
     });
     return response.json();
   },

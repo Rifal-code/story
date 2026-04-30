@@ -17,21 +17,23 @@ class App {
   }
 
   #setupDrawer() {
-    this.#drawerButton.addEventListener('click', () => {
-      this.#navigationDrawer.classList.toggle('open');
+    this.#drawerButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.#navigationDrawer.classList.toggle('hidden');
     });
 
     document.body.addEventListener('click', (event) => {
       if (
         !this.#navigationDrawer.contains(event.target) &&
-        !this.#drawerButton.contains(event.target)
+        !this.#drawerButton.contains(event.target) &&
+        window.innerWidth < 768
       ) {
-        this.#navigationDrawer.classList.remove('open');
+        this.#navigationDrawer.classList.add('hidden');
       }
 
-      this.#navigationDrawer.querySelectorAll('a').forEach((link) => {
-        if (link.contains(event.target)) {
-          this.#navigationDrawer.classList.remove('open');
+      this.#navigationDrawer.querySelectorAll('a, button').forEach((el) => {
+        if (el.contains(event.target) && window.innerWidth < 768) {
+          this.#navigationDrawer.classList.add('hidden');
         }
       });
     });
@@ -39,16 +41,14 @@ class App {
 
   async renderPage() {
     const url = getActiveRoute();
-    const page = routes[url] || routes['/']; // fallback to home
+    const page = routes[url] || routes['/'];
 
-    // Proteksi Halaman (jika belum login, redirect ke login)
     const publicRoutes = ['/login', '/register'];
     if (!Auth.isLoggedIn() && !publicRoutes.includes(url)) {
       window.location.hash = '#/login';
       return;
     }
     
-    // Redirect ke home jika sudah login tapi akses login/register
     if (Auth.isLoggedIn() && publicRoutes.includes(url)) {
       window.location.hash = '#/';
       return;
@@ -61,7 +61,6 @@ class App {
       await page.afterRender();
     };
 
-    // Custom View Transition API
     if (!document.startViewTransition) {
       await renderDOM();
       return;

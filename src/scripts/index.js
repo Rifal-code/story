@@ -1,4 +1,3 @@
-// CSS imports
 import '../styles/styles.css';
 
 import App from './pages/app';
@@ -16,7 +15,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     await app.renderPage();
   });
 
-  // Init web push notification
   await NotificationHelper.init();
 });
 
