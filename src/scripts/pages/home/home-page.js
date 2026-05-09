@@ -1,18 +1,31 @@
 import API from '../../utils/api';
 import L from 'leaflet';
+import IDBHelper from '../../data/idb-helper';
 
 class HomePage {
   async render() {
     return `
       <div class="space-y-12 mt-6">
-        <h1 class="text-4xl font-bold font-mono text-black">Beranda</h1>
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+          <h1 class="text-4xl font-bold font-mono text-black">Beranda</h1>
+          <div class="flex gap-4 w-full md:w-auto">
+            <input type="text" id="search-input" placeholder="Cari story..." class="px-4 py-2 border-2 border-black rounded-xl shadow-[4px_4px_0_0_#000] focus:outline-none focus:translate-x-[2px] focus:translate-y-[2px] transition-transform w-full md:w-64 font-bold">
+            <select id="sort-select" class="px-4 py-2 border-2 border-black rounded-xl shadow-[4px_4px_0_0_#000] focus:outline-none focus:translate-x-[2px] focus:translate-y-[2px] transition-transform font-bold cursor-pointer">
+              <option value="newest">Terbaru</option>
+              <option value="oldest">Terlama</option>
+            </select>
+          </div>
+        </div>
+        
         <section class="bg-[#ffadad] p-6 rounded-2xl border-2 border-black shadow-[6px_6px_0_0_#000]">
           <h2 class="text-2xl font-bold mb-4 font-mono text-black">Lokasi Stories</h2>
           <div id="map" class="h-64 md:h-96 w-full rounded-xl border-2 border-black z-0 relative"></div>
         </section>
 
         <section>
-          <h2 class="text-3xl font-bold mb-6 font-mono text-black">Terbaru</h2>
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold font-mono text-black">Daftar Story</h2>
+          </div>
           <div id="stories-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <!-- Loading skeleton -->
             <div class="animate-pulse bg-gray-300 border-2 border-black shadow-[4px_4px_0_0_#000] h-64 rounded-2xl"></div>
@@ -25,55 +38,92 @@ class HomePage {
   }
 
   async afterRender() {
-    const container = document.querySelector('#stories-container');
+    this.container = document.querySelector('#stories-container');
+    this.searchInput = document.querySelector('#search-input');
+    this.sortSelect = document.querySelector('#sort-select');
+    this.allStories = [];
     
     try {
       const response = await API.getStories();
-      const stories = response.listStory || [];
+      this.allStories = response.listStory || [];
       
-      container.innerHTML = '';
-      
-      if (stories.length === 0) {
-        container.innerHTML = '<p class="text-gray-500">Belum ada story.</p>';
-        return;
+      // Save to IDB for offline use
+      await IDBHelper.clearStories();
+      for (const story of this.allStories) {
+        await IDBHelper.putStory(story);
       }
+    } catch (error) {
+      console.warn('Network failed, falling back to IDB');
+      this.allStories = await IDBHelper.getAllStories();
+    }
+    
+    this._renderStories(this.allStories);
 
-      this._initMap(stories);
+    this.searchInput.addEventListener('input', () => this._handleFilterAndSort());
+    this.sortSelect.addEventListener('change', () => this._handleFilterAndSort());
+  }
 
-      const colors = ['bg-[#a2d2ff]', 'bg-[#fde047]', 'bg-[#caffbf]', 'bg-[#ffadad]', 'bg-[#bde0fe]'];
+  _handleFilterAndSort() {
+    const keyword = this.searchInput.value.toLowerCase();
+    const sortVal = this.sortSelect.value;
+    
+    let filtered = this.allStories.filter(story => 
+      story.name.toLowerCase().includes(keyword)
+    );
 
-      stories.forEach((story, index) => {
-        const date = new Date(story.createdAt).toLocaleDateString('id-ID', {
-          year: 'numeric', month: 'long', day: 'numeric'
-        });
+    if (sortVal === 'newest') {
+      filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    } else {
+      filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    }
+    
+    this._renderStories(filtered);
+  }
 
-        const colorClass = colors[index % colors.length];
+  _renderStories(stories) {
+    this.container.innerHTML = '';
+      
+    if (stories.length === 0) {
+      this.container.innerHTML = '<p class="text-gray-500 font-bold">Story tidak ditemukan.</p>';
+      return;
+    }
 
-        const card = document.createElement('a');
-        card.id = `story-card-${index}`;
-        card.href = `#/story/${story.id}`;
-        card.className = `${colorClass} rounded-2xl overflow-hidden border-2 border-black shadow-[6px_6px_0_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0_0_#000] transition-all flex flex-col cursor-pointer block`;
-        card.innerHTML = `
-          <img src="${story.photoUrl}" alt="Foto dari ${story.name}" class="w-full h-48 object-cover border-b-2 border-black" loading="lazy">
-          <div class="p-5 flex flex-col flex-grow overflow-hidden">
-            <h3 class="font-bold text-xl mb-1 font-mono text-black break-words">${story.name}</h3>
-            <p class="text-sm font-bold text-gray-700 mb-3">${date}</p>
-            <p class="text-black font-medium text-sm line-clamp-3 break-all">${story.description}</p>
-          </div>
-        `;
-        container.appendChild(card);
+    this._initMap(stories);
+
+    const colors = ['bg-[#a2d2ff]', 'bg-[#fde047]', 'bg-[#caffbf]', 'bg-[#ffadad]', 'bg-[#bde0fe]'];
+
+    stories.forEach((story, index) => {
+      const date = new Date(story.createdAt).toLocaleDateString('id-ID', {
+        year: 'numeric', month: 'long', day: 'numeric'
       });
 
-    } catch (error) {
-      container.innerHTML = '<p class="text-red-500">Gagal memuat data story.</p>';
-    }
+      const colorClass = colors[index % colors.length];
+
+      const card = document.createElement('a');
+      card.id = `story-card-${index}`;
+      card.href = `#/story/${story.id}`;
+      card.className = `${colorClass} rounded-2xl overflow-hidden border-2 border-black shadow-[6px_6px_0_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0_0_#000] transition-all flex flex-col cursor-pointer block`;
+      card.innerHTML = `
+        <img src="${story.photoUrl}" alt="Foto dari ${story.name}" class="w-full h-48 object-cover border-b-2 border-black" loading="lazy">
+        <div class="p-5 flex flex-col flex-grow overflow-hidden">
+          <h3 class="font-bold text-xl mb-1 font-mono text-black break-words">${story.name}</h3>
+          <p class="text-sm font-bold text-gray-700 mb-3">${date}</p>
+          <p class="text-black font-medium text-sm line-clamp-3 break-all">${story.description}</p>
+        </div>
+      `;
+      this.container.appendChild(card);
+    });
   }
 
   _initMap(stories) {
     const mapContainer = document.getElementById('map');
     if (!mapContainer) return;
 
-    const map = L.map('map').setView([-2.548926, 118.0148634], 5);
+    if (this.map) {
+      this.map.remove();
+    }
+
+    this.map = L.map('map').setView([-2.548926, 118.0148634], 5);
 
     const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
@@ -83,16 +133,16 @@ class HomePage {
       attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
     });
 
-    osmLayer.addTo(map);
+    osmLayer.addTo(this.map);
 
     L.control.layers({
       "OpenStreetMap": osmLayer,
       "Satellite": satLayer
-    }).addTo(map);
+    }).addTo(this.map);
 
     stories.forEach((story, index) => {
       if (story.lat && story.lon) {
-        const marker = L.marker([story.lat, story.lon]).addTo(map);
+        const marker = L.marker([story.lat, story.lon]).addTo(this.map);
         marker.bindPopup(`
           <div class="text-center">
             <b class="block mb-1">${story.name}</b>
@@ -103,7 +153,7 @@ class HomePage {
         const card = document.getElementById(`story-card-${index}`);
         if (card) {
           card.addEventListener('mouseenter', () => {
-            map.flyTo([story.lat, story.lon], 8, { duration: 0.5 });
+            this.map.flyTo([story.lat, story.lon], 8, { duration: 0.5 });
             marker.openPopup();
           });
         }

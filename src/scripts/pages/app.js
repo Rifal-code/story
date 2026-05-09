@@ -1,6 +1,8 @@
 import routes from '../routes/routes';
 import { getActiveRoute } from '../routes/url-parser';
 import Auth from '../utils/auth';
+import IDBHelper from '../data/idb-helper';
+import API from '../utils/api';
 
 class App {
   #content = null;
@@ -14,6 +16,7 @@ class App {
 
     this.#setupDrawer();
     Auth.updateUI();
+    this._setupOfflineSync();
   }
 
   #setupDrawer() {
@@ -36,6 +39,38 @@ class App {
           this.#navigationDrawer.classList.add('hidden');
         }
       });
+    });
+  }
+
+  _setupOfflineSync() {
+    window.addEventListener('online', async () => {
+      console.log('Koneksi kembali online. Menyinkronkan data...');
+      try {
+        const syncStories = await IDBHelper.getAllSyncStories();
+        for (const story of syncStories) {
+          const res = await fetch(story.photoBase64);
+          const blob = await res.blob();
+          
+          const formData = new FormData();
+          formData.append('description', story.description);
+          formData.append('photo', blob, 'offline-upload.jpg');
+          if (story.lat && story.lon) {
+            formData.append('lat', story.lat);
+            formData.append('lon', story.lon);
+          }
+          
+          await API.addStory(formData);
+          await IDBHelper.deleteSyncStory(story.id);
+        }
+        if (syncStories.length > 0) {
+          alert('Berhasil menyinkronkan ' + syncStories.length + ' story ke server.');
+          if (window.location.hash === '#/' || window.location.hash === '') {
+            this.renderPage();
+          }
+        }
+      } catch (err) {
+        console.error('Gagal sync data offline:', err);
+      }
     });
   }
 

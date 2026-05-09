@@ -21,39 +21,42 @@ function urlBase64ToUint8Array(base64String) {
 const NotificationHelper = {
   async init() {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-      console.warn('Browser tidak mendukung Service Worker atau Push Notification');
       return;
     }
 
     try {
-      const registration = await navigator.serviceWorker.register('/sw.js');
-      
-      if (Auth.isLoggedIn()) {
-        await this.requestPermissionAndSubscribe(registration);
-      }
+      this.registration = await navigator.serviceWorker.register('/sw.js');
     } catch (error) {
       console.error('Service Worker registration failed:', error);
     }
   },
 
-  async requestPermissionAndSubscribe(registration) {
+  async isSubscribed() {
+    if (!this.registration) return false;
+    const subscription = await this.registration.pushManager.getSubscription();
+    return !!subscription;
+  },
+
+  async subscribe() {
+    if (!this.registration) return false;
+
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') {
-      console.warn('Izin notifikasi ditolak oleh user.');
-      return;
+      alert('Izin notifikasi ditolak.');
+      return false;
     }
 
-    let subscription = await registration.pushManager.getSubscription();
+    let subscription = await this.registration.pushManager.getSubscription();
     
     if (!subscription) {
       try {
-        subscription = await registration.pushManager.subscribe({
+        subscription = await this.registration.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
         });
       } catch (error) {
-        console.error('Failed to subscribe to PushManager:', error);
-        return;
+        console.error('Gagal subscribe PushManager:', error);
+        return false;
       }
     }
 
@@ -66,16 +69,39 @@ const NotificationHelper = {
       }
     };
 
-    if (localStorage.getItem('hasSubscribed') === 'true') {
-      return;
-    }
-
     try {
       await API.subscribeNotification(payload);
-      localStorage.setItem('hasSubscribed', 'true');
-      console.log('Berhasil subscribe web push notification ke server API.');
+      localStorage.setItem('pushSubscribed', 'true');
+      return true;
     } catch (error) {
       console.error('Gagal mengirim subscription ke API:', error);
+      return false;
+    }
+  },
+
+  async unsubscribe() {
+    if (!this.registration) return false;
+
+    const subscription = await this.registration.pushManager.getSubscription();
+    if (!subscription) return true;
+
+    try {
+      await API.unsubscribeNotification(subscription.endpoint);
+      await subscription.unsubscribe();
+      localStorage.removeItem('pushSubscribed');
+      return true;
+    } catch (error) {
+      console.error('Gagal unsubscribe:', error);
+      return false;
+    }
+  },
+
+  async toggleSubscription() {
+    const subscribed = await this.isSubscribed();
+    if (subscribed) {
+      return await this.unsubscribe();
+    } else {
+      return await this.subscribe();
     }
   }
 };

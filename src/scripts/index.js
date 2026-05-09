@@ -16,5 +16,33 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   await NotificationHelper.init();
+
+  const pushToggle = document.getElementById('push-toggle');
+  if (pushToggle) {
+    pushToggle.checked = await NotificationHelper.isSubscribed();
+    
+    pushToggle.addEventListener('change', async (e) => {
+      e.preventDefault();
+      const isSubscribed = await NotificationHelper.isSubscribed();
+      
+      if (isSubscribed) {
+        const success = await NotificationHelper.unsubscribe();
+        if (success) {
+          pushToggle.checked = false;
+        } else {
+          pushToggle.checked = true;
+          alert('Gagal berhenti berlangganan notifikasi.');
+        }
+      } else {
+        const success = await NotificationHelper.subscribe();
+        if (success) {
+          pushToggle.checked = true;
+        } else {
+          pushToggle.checked = false;
+          alert('Gagal berlangganan notifikasi atau izin ditolak.');
+        }
+      }
+    });
+  }
 });
 

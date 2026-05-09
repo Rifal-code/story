@@ -1,5 +1,6 @@
 import API from '../../utils/api';
 import L from 'leaflet';
+import IDBHelper from '../../data/idb-helper';
 
 
 class AddStoryPage {
@@ -228,8 +229,23 @@ class AddStoryPage {
           }, 1500);
         }
       } catch (error) {
-        alertMsg.textContent = 'Gagal mengirim story. Coba lagi.';
-        alertMsg.className = 'text-red-500 text-sm block mt-3';
+        alertMsg.textContent = 'Anda sedang offline. Story disimpan secara lokal dan akan dikirim saat online.';
+        alertMsg.className = 'text-yellow-600 bg-yellow-100 text-sm font-bold block mt-3 px-3 py-2 rounded';
+        
+        // Simpan ke IDB dalam bentuk Base64 agar bisa direstore
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          await IDBHelper.putSyncStory({
+            description: desc,
+            photoBase64: reader.result,
+            lat: latInput.value ? parseFloat(latInput.value) : null,
+            lon: lonInput.value ? parseFloat(lonInput.value) : null,
+          });
+          setTimeout(() => {
+            window.location.hash = '#/';
+          }, 2000);
+        };
+        reader.readAsDataURL(file);
       } finally {
         submitBtn.disabled = false;
         submitBtn.innerHTML = 'Kirim Story';
