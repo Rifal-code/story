@@ -2,19 +2,19 @@
   "name": "Story App Dicoding",
   "short_name": "StoryApp",
   "description": "Aplikasi berbagi story seputar Dicoding",
-  "start_url": "/#/",
+  "start_url": "./#/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#fde047",
   "icons": [
     {
-      "src": "/favicon.png",
+      "src": "./favicon.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/favicon.png",
+      "src": "./favicon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -25,20 +25,20 @@
       "name": "Tambah Story",
       "short_name": "Add",
       "description": "Bagikan story baru",
-      "url": "/#/add-story",
-      "icons": [{ "src": "/favicon.png", "sizes": "192x192" }]
+      "url": "./#/add-story",
+      "icons": [{ "src": "./favicon.png", "sizes": "192x192" }]
     }
   ],
   "screenshots": [
     {
-      "src": "/favicon.png",
+      "src": "./favicon.png",
       "sizes": "192x192",
       "type": "image/png",
       "form_factor": "wide",
       "label": "Beranda Story App"
     },
     {
-      "src": "/favicon.png",
+      "src": "./favicon.png",
       "sizes": "192x192",
       "type": "image/png",
       "form_factor": "narrow",

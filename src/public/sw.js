@@ -2,10 +2,10 @@ const CACHE_NAME = 'story-app-v1';
 const API_CACHE = 'story-api-cache';
 
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/favicon.png'
+  './',
+  './index.html',
+  './manifest.json',
+  './favicon.png'
 ];
 
 self.addEventListener('install', (event) => {
@@ -78,8 +78,8 @@ self.addEventListener('push', (event) => {
   const title = data.title || 'Notification';
   const options = {
     body: data.options?.body || 'Anda mendapat pemberitahuan baru.',
-    icon: '/favicon.png', 
-    badge: '/favicon.png',
+    icon: './favicon.png', 
+    badge: './favicon.png',
     data: data.options?.data || {}
   };
 
