@@ -1,9 +1,10 @@
 import { openDB } from 'idb';
 
 const DATABASE_NAME = 'story-app-db';
-const DATABASE_VERSION = 1;
+const DATABASE_VERSION = 2;
 const STORE_STORIES = 'stories';
 const STORE_SYNC = 'sync-stories';
+const STORE_SAVED = 'saved-stories';
 
 const dbPromise = openDB(DATABASE_NAME, DATABASE_VERSION, {
   upgrade(db) {
@@ -12,6 +13,9 @@ const dbPromise = openDB(DATABASE_NAME, DATABASE_VERSION, {
     }
     if (!db.objectStoreNames.contains(STORE_SYNC)) {
       db.createObjectStore(STORE_SYNC, { keyPath: 'id', autoIncrement: true });
+    }
+    if (!db.objectStoreNames.contains(STORE_SAVED)) {
+      db.createObjectStore(STORE_SAVED, { keyPath: 'id' });
     }
   },
 });
@@ -56,6 +60,27 @@ const IDBHelper = {
   async deleteSyncStory(id) {
     const db = await dbPromise;
     return db.delete(STORE_SYNC, id);
+  },
+
+  // For saved stories (favorites)
+  async getSavedStory(id) {
+    const db = await dbPromise;
+    return db.get(STORE_SAVED, id);
+  },
+
+  async getAllSavedStories() {
+    const db = await dbPromise;
+    return db.getAll(STORE_SAVED);
+  },
+
+  async putSavedStory(story) {
+    const db = await dbPromise;
+    return db.put(STORE_SAVED, story);
+  },
+
+  async deleteSavedStory(id) {
+    const db = await dbPromise;
+    return db.delete(STORE_SAVED, id);
   }
 };
 

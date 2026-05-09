@@ -22,6 +22,7 @@ const Auth = {
     if (this.isLoggedIn()) {
       navList.innerHTML = `
         <li><a href="#/" class="bg-[#caffbf] border-2 border-black shadow-[4px_4px_0_0_#000] text-black px-4 py-2 rounded-xl font-bold hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0_0_#000] transition-all inline-block">Beranda</a></li>
+        <li><a href="#/saved-stories" class="bg-[#a2d2ff] border-2 border-black shadow-[4px_4px_0_0_#000] text-black px-4 py-2 rounded-xl font-bold hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0_0_#000] transition-all inline-block">Cerita Tersimpan</a></li>
         <li><a href="#/add-story" class="bg-white border-2 border-black shadow-[4px_4px_0_0_#000] text-black px-4 py-2 rounded-xl font-bold hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0_0_#000] transition-all inline-block">Tambah Story</a></li>
         <li><button id="logout-btn" class="bg-red-400 border-2 border-black shadow-[4px_4px_0_0_#000] text-black px-4 py-2 rounded-xl font-bold hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0_0_#000] transition-all inline-block cursor-pointer">Logout</button></li>
       `;
@@ -45,7 +46,7 @@ const Auth = {
     pushToggleLi.innerHTML = `
       <div class="bg-white border-2 border-black shadow-[4px_4px_0_0_#000] px-4 py-2 rounded-xl flex items-center justify-between gap-4 w-full">
         <span class="text-sm font-bold text-black">Notifikasi</span>
-        <label class="relative inline-flex items-center cursor-pointer">
+        <label for="push-toggle" class="relative inline-flex items-center cursor-pointer">
           <input type="checkbox" id="push-toggle" class="sr-only peer">
           <div class="w-11 h-6 bg-gray-200 border-2 border-black peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-black after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-400"></div>
         </label>

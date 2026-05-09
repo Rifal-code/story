@@ -11,7 +11,7 @@ class AddStoryPage {
         
         <form id="add-story-form" class="space-y-6">
           <div>
-            <label class="block text-sm font-bold text-black mb-2">Pilih atau Ambil Foto</label>
+            <label for="photo" class="block text-sm font-bold text-black mb-2">Pilih atau Ambil Foto</label>
             <div class="flex flex-col sm:flex-row gap-3 mb-2">
               <input type="file" id="photo" accept="image/*" class="block w-full text-sm text-black file:mr-4 file:py-2 file:px-4 file:border-2 file:border-black file:rounded-xl file:text-sm file:font-bold file:bg-[#fde047] file:text-black hover:file:translate-y-[2px] hover:file:translate-x-[2px] file:shadow-[4px_4px_0_0_#000] file:transition-all file:cursor-pointer bg-white px-2 py-1 rounded-xl border-2 border-black shadow-[4px_4px_0_0_#000]">
               <button type="button" id="open-camera-btn" class="bg-[#a2d2ff] text-black border-2 border-black shadow-[4px_4px_0_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_0_#000] px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all cursor-pointer">📸 Buka Kamera</button>

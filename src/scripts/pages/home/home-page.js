@@ -9,7 +9,9 @@ class HomePage {
         <div class="flex flex-col md:flex-row justify-between items-center gap-4">
           <h1 class="text-4xl font-bold font-mono text-black">Beranda</h1>
           <div class="flex gap-4 w-full md:w-auto">
+            <label for="search-input" class="sr-only">Cari story</label>
             <input type="text" id="search-input" placeholder="Cari story..." class="px-4 py-2 border-2 border-black rounded-xl shadow-[4px_4px_0_0_#000] focus:outline-none focus:translate-x-[2px] focus:translate-y-[2px] transition-transform w-full md:w-64 font-bold">
+            <label for="sort-select" class="sr-only">Urutkan story</label>
             <select id="sort-select" class="px-4 py-2 border-2 border-black rounded-xl shadow-[4px_4px_0_0_#000] focus:outline-none focus:translate-x-[2px] focus:translate-y-[2px] transition-transform font-bold cursor-pointer">
               <option value="newest">Terbaru</option>
               <option value="oldest">Terlama</option>
@@ -99,18 +101,50 @@ class HomePage {
 
       const colorClass = colors[index % colors.length];
 
-      const card = document.createElement('a');
+      const card = document.createElement('div');
       card.id = `story-card-${index}`;
-      card.href = `#/story/${story.id}`;
-      card.className = `${colorClass} rounded-2xl overflow-hidden border-2 border-black shadow-[6px_6px_0_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0_0_#000] transition-all flex flex-col cursor-pointer block`;
+      card.className = `${colorClass} rounded-2xl overflow-hidden border-2 border-black shadow-[6px_6px_0_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0_0_#000] transition-all flex flex-col`;
       card.innerHTML = `
-        <img src="${story.photoUrl}" alt="Foto dari ${story.name}" class="w-full h-48 object-cover border-b-2 border-black" loading="lazy">
-        <div class="p-5 flex flex-col flex-grow overflow-hidden">
-          <h3 class="font-bold text-xl mb-1 font-mono text-black break-words">${story.name}</h3>
-          <p class="text-sm font-bold text-gray-700 mb-3">${date}</p>
-          <p class="text-black font-medium text-sm line-clamp-3 break-all">${story.description}</p>
+        <a href="#/story/${story.id}" class="block cursor-pointer">
+          <img src="${story.photoUrl}" alt="Foto dari ${story.name}" class="w-full h-48 object-cover border-b-2 border-black" loading="lazy">
+          <div class="p-5 flex flex-col flex-grow overflow-hidden">
+            <h3 class="font-bold text-xl mb-1 font-mono text-black break-words">${story.name}</h3>
+            <p class="text-sm font-bold text-gray-700 mb-3">${date}</p>
+            <p class="text-black font-medium text-sm line-clamp-3 break-all mb-4">${story.description}</p>
+          </div>
+        </a>
+        <div class="px-5 pb-5 mt-auto">
+          <button type="button" class="save-btn w-full bg-white text-black font-bold py-2 px-4 border-2 border-black rounded-xl shadow-[4px_4px_0_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_0_#000] transition-all cursor-pointer">
+            ⭐ Simpan
+          </button>
         </div>
       `;
+
+      const saveBtn = card.querySelector('.save-btn');
+      // Check if already saved
+      IDBHelper.getSavedStory(story.id).then(saved => {
+        if (saved) {
+          saveBtn.innerHTML = '✅ Tersimpan';
+          saveBtn.classList.replace('bg-white', 'bg-green-300');
+        }
+      });
+
+      saveBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const isSaved = await IDBHelper.getSavedStory(story.id);
+        if (isSaved) {
+          await IDBHelper.deleteSavedStory(story.id);
+          saveBtn.innerHTML = '⭐ Simpan';
+          saveBtn.classList.replace('bg-green-300', 'bg-white');
+        } else {
+          await IDBHelper.putSavedStory(story);
+          saveBtn.innerHTML = '✅ Tersimpan';
+          saveBtn.classList.replace('bg-white', 'bg-green-300');
+        }
+      });
+
       this.container.appendChild(card);
     });
   }
