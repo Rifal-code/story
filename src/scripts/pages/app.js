@@ -43,13 +43,25 @@ class App {
   }
 
   _setupOfflineSync() {
-    window.addEventListener('online', async () => {
-      console.log('Koneksi kembali online. Menyinkronkan data...');
+    const dataURItoBlob = (dataURI) => {
+      const byteString = atob(dataURI.split(',')[1]);
+      const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+      const ab = new ArrayBuffer(byteString.length);
+      const ia = new Uint8Array(ab);
+      for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
+      return new Blob([ab], { type: mimeString });
+    };
+
+    const syncData = async () => {
       try {
         const syncStories = await IDBHelper.getAllSyncStories();
+        if (!syncStories || syncStories.length === 0) return;
+
+        console.log('Menyinkronkan data offline ke server...');
         for (const story of syncStories) {
-          const res = await fetch(story.photoBase64);
-          const blob = await res.blob();
+          const blob = dataURItoBlob(story.photoBase64);
           
           const formData = new FormData();
           formData.append('description', story.description);
@@ -62,16 +74,21 @@ class App {
           await API.addStory(formData);
           await IDBHelper.deleteSyncStory(story.id);
         }
-        if (syncStories.length > 0) {
-          alert('Berhasil menyinkronkan ' + syncStories.length + ' story ke server.');
-          if (window.location.hash === '#/' || window.location.hash === '') {
-            this.renderPage();
-          }
+        
+        alert('Berhasil menyinkronkan ' + syncStories.length + ' story ke server.');
+        if (window.location.hash === '#/' || window.location.hash === '') {
+          this.renderPage();
         }
       } catch (err) {
         console.error('Gagal sync data offline:', err);
       }
-    });
+    };
+
+    window.addEventListener('online', syncData);
+
+    if (navigator.onLine) {
+      syncData();
+    }
   }
 
   async renderPage() {
